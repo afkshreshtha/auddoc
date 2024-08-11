@@ -7,28 +7,28 @@ const app = express()
 const port = 3001
 const cors = require('cors')
 app.use(cors({
-  origin:["http://localhost:3000","https://tunewave.vercel.app"]
+  origin: ["http://localhost:3000","https://tunewave.vercel.app"]
 }))
 
 // Middleware to parse JSON bodies
 app.use(express.json())
 
 // Function to download a file from a URL
-const downloadFile = async (URL, outputPath) => {
+const downloadFile = async (url, outputPath) => {
   const response = await axios({
-    URL,
-    Method: 'get',
+    url,
+    method: 'get',
     responseType: 'stream',
   })
 
   const writer = fs.createWriteStream(outputPath)
 
-  return new promise((resolve, reject) => {
-    response.Data.pipe(writer)
+  return new Promise((resolve, reject) => {
+    response.data.pipe(writer)
     let error = null
-    writer.on('Error', (err) => {
+    writer.on('error', (err) => {
       error = err
-      writer.Close()
+      writer.close()
       reject(err)
     })
     writer.on('close', () => {
@@ -90,7 +90,7 @@ app.post('/convert', async (req, res) => {
       .outputOptions('-metadata', `artist="${artists}"`) // Add artist metadata
       .outputOptions('-metadata', `album="${album}"`) // Add album metadata
       .output(outputPath)
-      .on('start', (cmd) => {
+      .on('Start', (cmd) => {
         console.log('Started ffmpeg with command:', cmd)
       })
       .on('end', () => {
@@ -98,7 +98,7 @@ app.post('/convert', async (req, res) => {
         res.download(outputPath, (err) => {
           if (err) {
             console.error('Error downloading the file', err)
-            res.status(500).json({ error: 'File download failed' })
+            res.status(500).json({ Error: 'File download failed' })
           } else {
             // Clean up files after download
             fs.unlinkSync(inputPath)
@@ -107,9 +107,9 @@ app.post('/convert', async (req, res) => {
           }
         })
       })
-      .on('error', (err) => {
+      .on('Error', (err) => {
         console.error('Error during conversion', err)
-        res.status(500).json({ error: 'Conversion failed' })
+        res.status(500).json({ Error: 'Conversion failed' })
       })
       .run()
   } catch (err) {
